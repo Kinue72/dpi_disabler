@@ -2,6 +2,9 @@
 #include "raw_replacements.h"
 #include "types.h"
 #include <linux/moduleparam.h>
+#include "types.h"
+
+static char custom_fake_buf[MAX_FAKE_SIZE];
 
 #define STR_MAXLEN 2048
 
@@ -20,6 +23,7 @@ struct config_t config = {
 	.mark = DEFAULT_RAWSOCKET_MARK,
 	.synfake = 0,
 	.synfake_len = 0,
+	.fake_sni_type = FAKE_PAYLOAD_DEFAULT,
 
 	.sni_detection = SNI_DETECTION_PARSE,
 
@@ -47,6 +51,8 @@ struct config_t config = {
 	.queue_start_num = DEFAULT_QUEUE_NUM,
 	.fake_sni_pkt = fake_sni_old,
 	.fake_sni_pkt_sz = sizeof(fake_sni_old) - 1, // - 1 for null-terminator
+	.fake_custom_pkt = custom_fake_buf,
+	.fake_custom_pkt_sz = 0
 };
 
 static int unumeric_set(const char *val, const struct kernel_param *kp) {
@@ -119,6 +125,7 @@ module_param_cb(fk_winsize, &unumeric_parameter_ops, &config.fk_winsize, 0664);
 module_param_cb(synfake, &boolean_parameter_ops, &config.synfake, 0664);
 module_param_cb(synfake_len, &unumeric_parameter_ops, &config.synfake_len, 0664);
 module_param_cb(packet_mark, &unumeric_parameter_ops, &config.mark, 0664);
+// module_param_cb(seg2delay, &unumeric_parameter_ops, &config.seg2_delay, 0664);
 
 static int sni_domains_set(const char *val, const struct kernel_param *kp) {
 	size_t len;
@@ -187,33 +194,59 @@ static const struct kernel_param_ops exclude_domains_ops = {
 module_param_cb(exclude_domains, &exclude_domains_ops, &config.exclude_domains_str, 0664);
 
 module_param_cb(no_ipv6, &inverse_boolean_ops, &config.use_ipv6, 0664);
-module_param_cb(silent, &inverse_boolean_ops, &config.verbose, 0664);
 module_param_cb(quic_drop, &boolean_parameter_ops, &config.quic_drop, 0664);
 
-static int verbose_trace_set(const char *val, const struct kernel_param *kp) {
-	int n = 0, ret;
-	ret = kstrtoint(val, 10, &n);
-	if (ret != 0 || (n != 0 && n != 1))
-		return -EINVAL;
+static int verbosity_set(const char *val, const struct kernel_param *kp) {
+	size_t len;
 
-	if (n) {
-		n = VERBOSE_TRACE;
-	} else {
-		n = VERBOSE_DEBUG;
+	len = strnlen(val, STR_MAXLEN + 1);
+	if (len == STR_MAXLEN + 1) {
+		pr_err("%s: string parameter too long\n", kp->name);
+		return -ENOSPC;
 	}
-	if (kp->arg == NULL) 
-		return -EINVAL;
 
-	*(int *)kp->arg = n;
+	if (len >= 1 && val[len - 1] == '\n') {
+		len--;
+	}
+
+	if (strncmp(val, "trace", len) == 0) {
+		*(int *)kp->arg = VERBOSE_TRACE;
+	} else if (strncmp(val, "debug", len) == 0) {
+		*(int *)kp->arg = VERBOSE_DEBUG;
+	} else if (strncmp(val, "silent", len) == 0) {
+		*(int *)kp->arg = VERBOSE_INFO;
+	} else {
+		return -EINVAL;
+	}
+
 	return 0;
 }
 
-static const struct kernel_param_ops verbose_trace_ops = {
-	.set = verbose_trace_set,
-	.get = param_get_int,
+
+static int verbosity_get(char *buffer, const struct kernel_param *kp) {
+	switch (*(int *)kp->arg) {
+		case VERBOSE_TRACE:
+			strcpy(buffer, "trace\n");
+			break;
+		case VERBOSE_DEBUG:
+			strcpy(buffer, "debug\n");
+			break;
+		case VERBOSE_INFO:
+			strcpy(buffer, "silent\n");
+			break;
+		default:
+			strcpy(buffer, "unknown\n");
+	}
+
+	return strlen(buffer);
+}
+
+static const struct kernel_param_ops verbosity_ops = {
+	.set = verbosity_set,
+	.get = verbosity_get,
 };
 
-module_param_cb(trace, &verbose_trace_ops, &config.verbose, 0664);
+module_param_cb(verbosity, &verbosity_ops, &config.verbose, 0664);
 
 static int frag_strat_set(const char *val, const struct kernel_param *kp) {
 	size_t len;
@@ -372,3 +405,110 @@ static const struct kernel_param_ops sni_detection_ops = {
 };
 
 module_param_cb(sni_detection, &sni_detection_ops, &config.sni_detection, 0664);
+
+static int fake_type_set(const char *val, const struct kernel_param *kp) {
+	size_t len;
+
+	len = strnlen(val, STR_MAXLEN + 1);
+	if (len == STR_MAXLEN + 1) {
+		pr_err("%s: string parameter too long\n", kp->name);
+		return -ENOSPC;
+	}
+
+	if (len >= 1 && val[len - 1] == '\n') {
+		len--;
+	}
+
+	if (strncmp(val, "default", len) == 0) {
+		*(int *)kp->arg = FAKE_PAYLOAD_DEFAULT;
+	} else if (strncmp(val, "custom", len) == 0) {
+		*(int *)kp->arg = FAKE_PAYLOAD_CUSTOM;
+	} else if (strncmp(val, "random", len) == 0) {
+		*(int *)kp->arg = FAKE_PAYLOAD_RANDOM;
+	} else {
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
+static int fake_type_get(char *buffer, const struct kernel_param *kp) {
+	switch (*(int *)kp->arg) {
+		case FAKE_PAYLOAD_DEFAULT:
+			strcpy(buffer, "default\n");
+			break;
+		case FAKE_PAYLOAD_RANDOM:
+			strcpy(buffer, "random\n");
+			break;
+		case FAKE_PAYLOAD_CUSTOM:
+			strcpy(buffer, "custom\n");
+			break;
+		default:
+			strcpy(buffer, "unknown\n");
+	}
+
+	return strlen(buffer);
+}
+
+static const struct kernel_param_ops fake_type_ops = {
+	.set = fake_type_set,
+	.get = fake_type_get,
+};
+
+module_param_cb(fake_sni_type, &fake_type_ops, &config.fake_sni_type, 0664);
+
+static int fake_custom_pl_set(const char *val, const struct kernel_param *kp) {
+	size_t len;
+
+	len = strnlen(val, STR_MAXLEN + 1);
+	if (len == STR_MAXLEN + 1) {
+		pr_err("%s: string parameter too long\n", kp->name);
+		return -ENOSPC;
+	}
+
+	if (len >= 1 && val[len - 1] == '\n') {
+		len--;
+	}
+
+	uint8_t *const custom_buf = (uint8_t *)custom_fake_buf;
+	const char *custom_hex_fake = val;
+	size_t custom_hlen = len;
+
+	if ((custom_hlen & 1) == 1) {
+		return -EINVAL;
+	}
+
+
+	size_t custom_len = custom_hlen >> 1;
+	if (custom_len > MAX_FAKE_SIZE) {
+		return -EINVAL;
+	}
+
+	for (int i = 0; i < custom_len; i++) {
+		sscanf(custom_hex_fake + (i << 1), "%2hhx", custom_buf + i);
+	}
+
+	config.fake_custom_pkt_sz = custom_len;
+	config.fake_custom_pkt = (char *)custom_buf;
+
+	return 0;
+}
+
+static int fake_custom_pl_get(char *buffer, const struct kernel_param *kp) {
+	int cflen = config.fake_custom_pkt_sz;
+	const uint8_t *cbf_data = config.fake_custom_pkt;
+	int bflen = config.fake_custom_pkt_sz << 1;
+
+	for (int i = 0; i < cflen; i++) {
+		sprintf(buffer + (i << 1), "%02x", *((unsigned char *)cbf_data + i));
+	}
+
+	return bflen;
+}
+
+static const struct kernel_param_ops fake_custom_pl_ops = {
+	.set = fake_custom_pl_set,
+	.get = fake_custom_pl_get,
+};
+
+module_param_cb(fake_custom_payload, &fake_custom_pl_ops, &config.fake_custom_pkt, 0664);

@@ -85,7 +85,9 @@ For nftables on OpenWRT rules comes out-of-the-box and stored under `/usr/share/
 
 Now we go to the configuration. For OpenWRT here is configuration via [UCI](https://openwrt.org/docs/guide-user/base-system/uci) and [LuCI](https://openwrt.org/docs/guide-user/luci/start) available (CLI and GUI respectively).
 
-Luci is a configuration interface for your router (which you connect when enter 192.168.1.1 in browser). LuCI configuration lives in **Services->youtubeUnblock** section. It is self descriptive, with description for each flag. Note, that after you push `Save & Apply` button, the configuration is applied automatically and the service is restarted.
+For **LuCI** aka **GUI** aka **web-interface of router** you should install **luci-app-youtubeUnblock** package like you did it with the normal youtubeUnblock package. Note, that lists of official opkg feeds should be loaded (**Do it with Update lists option**).
+
+LuCI configuration lives in **Services->youtubeUnblock** section. It is self descriptive, with description for each flag. Note, that after you push `Save & Apply` button, the configuration is applied automatically and the service is restarted.
 
 UCI configuration is available in /etc/config/youtubeUnblock file, in section `youtubeUnblock.youtubeUnblock`. The configuration is done with [flags](#flags). Note, that names of flags are not the same: you should replace `-` with `_`, you shouldn't use leading `--` for flag. Also you will enable toggle flags (without parameters) with `1`. 
 
@@ -180,6 +182,9 @@ Available flags:
 - `--fake-sni={0|1}` This flag enables fake-sni which forces **youtubeUnblock** to send at least three packets instead of one with TLS *ClientHello*: Fake *ClientHello*, 1st part of original *ClientHello*, 2nd part of original *ClientHello*. This flag may be related to some Operation not permitted error messages, so before open an issue refer to [Troubleshooting for EPERMS](#troubleshooting-eperms-operation-not-permitted). Defaults to **1**.
 
 - `--fake-sni-seq-len=<length>` This flag specifies **youtubeUnblock** to build a complicated construction of fake client hello packets. length determines how much fakes will be sent. Defaults to **1**.
+
+- `--fake-sni-type={default|custom|random}` This flag specifies which faking message type should be used for fake packets. For `random`, the message of random length and with random payload will be sent. For `default` the default payload (sni=www.google.com) is used. And for the `custom` option, the payload from `--fake-custom-payload` section utilized. Defaults to `default`.
+- `--fake-custom-payload=<payload>` Useful with `--fake-sni-type=custom`. You should specify the payload for fake message manually. Use hex format: `--fake-custom-payload=0001020304` mean that 5 bytes sequence: `0x00`, `0x01`, `0x02`, `0x03`, `0x04` used as fake.
 
 - `--faking-strategy={randseq|ttl|tcp_check|pastseq|md5sum}` This flag determines the strategy of fake packets invalidation. Defaults to `randseq`
   - `randseq` specifies that random sequence/acknowledgemend random will be set. This option may be handled by provider which uses *conntrack* with drop on invalid *conntrack* state firewall rule enabled. 
@@ -319,7 +324,9 @@ You can configure the module with its flags in insmod:
 insmod kyoutubeUnblock.ko fake_sni=1 exclude_domains=.ru quic_drop=1
 ```
 
-Note that the flags names are different from ones used for the regular youtubeUnblock(right like in UCI configuration for OpenWRT): replace `-` with `_` and no leading `--`. Also to configure togglers you should set them to `1` (`silent=1 quic_drop=1`)
+Note that the flags names are different from ones used for the regular youtubeUnblock(right like in UCI configuration for OpenWRT): replace `-` with `_` and no leading `--`. Also to configure togglers you should set them to `1` (`quic_drop=1`)
+
+Also a good thig to mention is verbosity. The kernel module combines --trace and --silent option to the one parameter `verbosity`. This parameter accepts 3 arguments: `trace`, `debug` and `silent`. I highly don't recommend to enable `trace` mod on router because it may cause huge problems with performance and even freeze your device. 
 
 Also a drop in replacement is supported for all the parameters excluding packet mark. A drop in replacement does not require module restart if you want to change the parameters. You can specify and check the parameters within module's directory inside the sysfs: `/sys/module/kyoutubeUnblock/parameters/`. For example, to set quic_drop to true you may use next command:
 ```sh
