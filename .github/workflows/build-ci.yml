@@ -30,7 +30,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          echo "version=$(cat youtubeUnblock/Makefile | grep PKG_VERSION | sed 's/PKG_VERSION:=//')" >> $GITHUB_OUTPUT
+          echo "version=$(cat dpiDisabler/Makefile | grep PKG_VERSION | sed 's/PKG_VERSION:=//')" >> $GITHUB_OUTPUT
           if [[ "${{ github.event_name }}" != "pull_request" ]]; then
             echo "sha=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
           else
@@ -83,17 +83,17 @@ jobs:
             *)       PLATFORM=$ARCH ;;
           esac
           make -j$(nproc) CC="ccache gcc -static-libgcc -static" || exit 1
-          strip -s build/youtubeUnblock
-          cp -va build/youtubeUnblock .
-          tar -czvf youtubeUnblock-$VERSION-$SHA-$PLATFORM-static.tar.gz youtubeUnblock youtubeUnblock.service README.md
+          strip -s build/dpiDisabler
+          cp -va build/dpiDisabler .
+          tar -czvf dpiDisabler-$VERSION-$SHA-$PLATFORM-static.tar.gz dpiDisabler dpiDisabler.service README.md
           ccache --show-stats
 
       - name: Upload artifacts
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: youtubeUnblock-static-${{ matrix.arch }}
-          path: ./**/youtubeUnblock*.tar.gz
+          name: dpiDisabler-static-${{ matrix.arch }}
+          path: ./**/dpiDisabler*.tar.gz
 
   build-static-cross:
     needs: prepare
@@ -144,16 +144,16 @@ jobs:
             NM=$TOOL-nm \
             STRIP=$TOOL-strip \
             CROSS_COMPILE_PLATFORM=$TOOL || exit 1
-          $TOOL-strip -s build/youtubeUnblock
-          cp -va build/youtubeUnblock .
-          tar -czvf youtubeUnblock-$VERSION-$SHA-$ARCH-static.tar.gz youtubeUnblock youtubeUnblock.service README.md
+          $TOOL-strip -s build/dpiDisabler
+          cp -va build/dpiDisabler .
+          tar -czvf dpiDisabler-$VERSION-$SHA-$ARCH-static.tar.gz dpiDisabler dpiDisabler.service README.md
 
       - name: Upload artifacts
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: static-${{ matrix.arch }}
-          path: ./**/youtubeUnblock*.tar.gz
+          path: ./**/dpiDisabler*.tar.gz
 
   build-openwrt:
     needs: prepare
@@ -203,7 +203,7 @@ jobs:
           VERSION: ${{ needs.prepare.outputs.version }}
           SHA: ${{ needs.prepare.outputs.sha }}
         run: |
-          sed -i "s/PKG_REV:=.*$/PKG_REV:=$SHA/;s/PKG_VERSION:=.*$/PKG_VERSION:=$VERSION-$SHA/" youtubeUnblock/Makefile
+          sed -i "s/PKG_REV:=.*$/PKG_REV:=$SHA/;s/PKG_VERSION:=.*$/PKG_VERSION:=$VERSION-$SHA/" dpiDisabler/Makefile
 
       - name: Build packages
         id: build
@@ -212,20 +212,20 @@ jobs:
           SHA: ${{ needs.prepare.outputs.sha }}
         working-directory: /builder
         run: |
-          echo "src-link youtubeUnblock $GITHUB_WORKSPACE" >> feeds.conf
+          echo "src-link dpiDisabler $GITHUB_WORKSPACE" >> feeds.conf
           cat feeds.conf
-          ./scripts/feeds update youtubeUnblock
-          ./scripts/feeds install -a -p youtubeUnblock
+          ./scripts/feeds update dpiDisabler
+          ./scripts/feeds install -a -p dpiDisabler
           make defconfig
-          make package/youtubeUnblock/compile V=s
-          mv $(find ./bin -type f -name 'youtubeUnblock*.ipk') ./youtubeUnblock-$VERSION-$SHA-${{ matrix.arch }}-${{ matrix.branch }}.ipk
+          make package/dpiDisabler/compile V=s
+          mv $(find ./bin -type f -name 'dpiDisabler*.ipk') ./dpiDisabler-$VERSION-$SHA-${{ matrix.arch }}-${{ matrix.branch }}.ipk
 
       - name: Upload packages
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: youtubeUnblock-${{ matrix.branch }}-${{ matrix.arch }}
-          path: /builder/youtubeUnblock*.ipk
+          name: dpiDisabler-${{ matrix.branch }}-${{ matrix.arch }}
+          path: /builder/dpiDisabler*.ipk
           if-no-files-found: error
 
   build-openwrt-luci:
@@ -245,7 +245,7 @@ jobs:
           VERSION: ${{ needs.prepare.outputs.version }}
           SHA: ${{ needs.prepare.outputs.sha }}
         run: |
-          sed -i "s/PKG_REV:=.*$/PKG_REV:=$SHA/;s/PKG_VERSION:=.*$/PKG_VERSION:=$VERSION-$SHA/" youtubeUnblock/Makefile
+          sed -i "s/PKG_REV:=.*$/PKG_REV:=$SHA/;s/PKG_VERSION:=.*$/PKG_VERSION:=$VERSION-$SHA/" dpiDisabler/Makefile
 
       - name: Build packages
         id: build
@@ -254,20 +254,20 @@ jobs:
           SHA: ${{ needs.prepare.outputs.sha }}
         working-directory: /builder
         run: |
-          echo "src-link youtubeUnblock $GITHUB_WORKSPACE" >> feeds.conf
+          echo "src-link dpiDisabler $GITHUB_WORKSPACE" >> feeds.conf
           cat feeds.conf
-          ./scripts/feeds update youtubeUnblock
-          ./scripts/feeds install -a -p youtubeUnblock
+          ./scripts/feeds update dpiDisabler
+          ./scripts/feeds install -a -p dpiDisabler
           make defconfig
-          make package/luci-app-youtubeUnblock/compile V=s
-          mv $(find ./bin -type f -name 'luci-app-youtubeUnblock*.ipk') ./luci-app-youtubeUnblock-$VERSION-$SHA.ipk
+          make package/luci-app-dpiDisabler/compile V=s
+          mv $(find ./bin -type f -name 'luci-app-dpiDisabler*.ipk') ./luci-app-dpiDisabler-$VERSION-$SHA.ipk
 
       - name: Upload packages
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: luci-app-youtubeUnblock
-          path: /builder/luci-app-youtubeUnblock*.ipk
+          name: luci-app-dpiDisabler
+          path: /builder/luci-app-dpiDisabler*.ipk
           if-no-files-found: error
 
   build-entware:
@@ -329,16 +329,16 @@ jobs:
           VERSION: ${{ needs.prepare.outputs.version }}
           SHA: ${{ needs.prepare.outputs.sha }}
         run: |
-          sed -i "s/PKG_REV:=.*$/PKG_REV:=$SHA/;s/PKG_VERSION:=.*$/PKG_VERSION:=$VERSION-$SHA/" youtubeUnblock/Makefile
+          sed -i "s/PKG_REV:=.*$/PKG_REV:=$SHA/;s/PKG_VERSION:=.*$/PKG_VERSION:=$VERSION-$SHA/" dpiDisabler/Makefile
 
       - name: Build packages
         id: build
         run: |
-          echo "src-link youtubeUnblock /youtubeUnblock" | docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/youtubeUnblock -w /home/me/Entware --name builder builder tee -a feeds.conf
-          docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/youtubeUnblock -w /home/me/Entware --name builder builder ./scripts/feeds update youtubeUnblock
-          docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/youtubeUnblock -w /home/me/Entware --name builder builder ./scripts/feeds install -a -p youtubeUnblock
-          echo "CONFIG_PACKAGE_youtubeUnblock=m" | docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/youtubeUnblock -w /home/me/Entware --name builder builder tee -a .config
-          docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/youtubeUnblock -w /home/me/Entware --name builder builder make package/youtubeUnblock/compile V=s
+          echo "src-link dpiDisabler /dpiDisabler" | docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/dpiDisabler -w /home/me/Entware --name builder builder tee -a feeds.conf
+          docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/dpiDisabler -w /home/me/Entware --name builder builder ./scripts/feeds update dpiDisabler
+          docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/dpiDisabler -w /home/me/Entware --name builder builder ./scripts/feeds install -a -p dpiDisabler
+          echo "CONFIG_PACKAGE_dpiDisabler=m" | docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/dpiDisabler -w /home/me/Entware --name builder builder tee -a .config
+          docker run --rm -i --mount source=entware-home,target=/home/me -v $GITHUB_WORKSPACE:/dpiDisabler -w /home/me/Entware --name builder builder make package/dpiDisabler/compile V=s
 
       - name: Extract packages
         if: steps.build.outcome == 'success'
@@ -348,18 +348,18 @@ jobs:
           SHA: ${{ needs.prepare.outputs.sha }}
         run: |
           mkdir output
-          docker run --rm --user root -i --mount source=entware-home,target=/home/me -v $(pwd):/target -w /home/me/Entware --name builder builder find ./bin -type f -name 'youtubeUnblock*.ipk' -exec cp -v {} /target/output \;
-          rm -rf youtubeUnblock || true
-          mkdir youtubeUnblock
-          bash -c "cp -r ./output/* youtubeUnblock"
-          tar -czvf youtubeUnblock-$VERSION-$SHA-${{ matrix.arch }}-entware.tar.gz youtubeUnblock
+          docker run --rm --user root -i --mount source=entware-home,target=/home/me -v $(pwd):/target -w /home/me/Entware --name builder builder find ./bin -type f -name 'dpiDisabler*.ipk' -exec cp -v {} /target/output \;
+          rm -rf dpiDisabler || true
+          mkdir dpiDisabler
+          bash -c "cp -r ./output/* dpiDisabler"
+          tar -czvf dpiDisabler-$VERSION-$SHA-${{ matrix.arch }}-entware.tar.gz dpiDisabler
 
       - name: Upload packages
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: youtubeUnblock-entware-${{ matrix.arch }}
-          path: ./**/youtubeUnblock*-entware.tar.gz
+          name: dpiDisabler-entware-${{ matrix.arch }}
+          path: ./**/dpiDisabler*-entware.tar.gz
           if-no-files-found: error
 
   pre-release:
@@ -381,6 +381,6 @@ jobs:
           draft: true
           title: 'Development build'
           files: |
-            ./**/youtubeUnblock*.ipk
-            ./**/youtubeUnblock*.tar.gz
-            ./**/luci-app-youtubeUnblock*.ipk
+            ./**/dpiDisabler*.ipk
+            ./**/dpiDisabler*.tar.gz
+            ./**/luci-app-dpiDisabler*.ipk

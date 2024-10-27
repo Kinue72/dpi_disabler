@@ -110,7 +110,7 @@ static long parse_numeric_option(const char* value) {
 }
 
 void print_version() {
-  	printf("youtubeUnblock\n");	
+  	printf("dpiDisabler (youtubeUnblock fork)\n");	
 	printf("Bypasses deep packet inspection systems that relies on SNI\n");
 	printf("\n");
 }
@@ -553,7 +553,7 @@ void print_welcome() {
 		}
 
 		if (section->all_domains) {
-			printf("All Client Hello will be targetted by youtubeUnblock!\n");
+			printf("All Client Hello will be targetted by dpiDisabler!\n");
 		} else {
 			printf("Target sni domains: %s\n", section->domains_str);
 		}
