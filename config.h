@@ -187,7 +187,7 @@ if ((fake_bitmask) & strategy)
 
 #define MAX_PACKET_SIZE 8192
 
-#define DEFAULT_SNISTR "googlevideo.com,ggpht.com,ytimg.com,youtube.com,play.google.com,youtu.be,googleapis.com,googleusercontent.com,gstatic.com,l.google.com"
+#define DEFAULT_SNISTR "medium.com,wattpad.com"
 
 static const char default_snistr[] = DEFAULT_SNISTR;
 
@@ -206,12 +206,12 @@ enum {
 	.exclude_sni_domains = NULL,				\
 	.all_domains = 0,					\
 	.tls_enabled = 1,					\
-	.frag_sni_reverse = 1,                                  \
+	.frag_sni_reverse = 0,                                  \
 	.frag_sni_faked = 0,                                    \
 	.fragmentation_strategy = FRAGMENTATION_STRATEGY,       \
 	.faking_strategy = FAKING_STRATEGY,                     \
 	.faking_ttl = FAKE_TTL,                                 \
-	.fake_sni = 1,                                          \
+	.fake_sni = 0,                                          \
 	.fake_sni_seq_len = 1,                                  \
 	.fake_sni_type = FAKE_PAYLOAD_DEFAULT,                  \
 	.fake_custom_pkt = NULL,				\
