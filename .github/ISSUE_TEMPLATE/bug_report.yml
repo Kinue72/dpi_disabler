@@ -5,11 +5,11 @@ body:
     attributes:
       value: |
         Use this issue template when you are pretty sure here is a bug. 
-        Make sure the trouble you are experiencing haven't been already reported earlier and haven't been talked about in [discussions](https://github.com/Waujito/youtubeUnblock/discussions).
+        Make sure the trouble you are experiencing haven't been already reported earlier and haven't been talked about in [discussions](https://github.com/Waujito/dpiDisabler/discussions).
 
-        Note, that *bugs* are internal program errors: crashes, freezes and other types of undefined behavior. You may also report problems with routers infrastructure here, but **NOT** questions like *My router doesn't work help please*. Your questions and other stuff with custom routers setup should be discussed [here](https://github.com/Waujito/youtubeUnblock/discussions/172)
+        Note, that *bugs* are internal program errors: crashes, freezes and other types of undefined behavior. You may also report problems with routers infrastructure here, but **NOT** questions like *My router doesn't work help please*. Your questions and other stuff with custom routers setup should be discussed [here](https://github.com/Waujito/dpiDisabler/discussions/172)
 
-        Discuss problems like *youtube doesn't unblock* [here](https://github.com/Waujito/youtubeUnblock/discussions/173)
+        Discuss problems like *youtube doesn't unblock* [here](https://github.com/Waujito/dpiDisabler/discussions/173)
   - type: textarea
     id: bug-report
     attributes:
@@ -37,6 +37,6 @@ body:
     id: configs
     attributes:
       label: Configuration
-      description: Pass here the configuration of youtubeUnblock being used. You may pass output of `cat /etc/config/youtubeUnblock` on OpenWRT or raw flags of youtubeUnblock.
+      description: Pass here the configuration of dpiDisabler being used. You may pass output of `cat /etc/config/dpiDisabler` on OpenWRT or raw flags of dpiDisabler.
     validations:
       required: false

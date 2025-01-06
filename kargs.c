@@ -16,7 +16,7 @@ static int params_set(const char *cval, const struct kernel_param *kp) {
 		cv_len--;
 	}
 
-	const char *ytb_prefix = "youtubeUnblock ";
+	const char *ytb_prefix = "dpiDisabler ";
 	int ytbp_len = strlen(ytb_prefix);
 	int len = cv_len + ytbp_len; 
 

@@ -1,4 +1,4 @@
-name: "youtubeUnblock build test"
+name: "dpiDisabler build test"
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          echo "version=$(cat youtubeUnblock/Makefile | grep PKG_VERSION | sed 's/PKG_VERSION:=//')" >> $GITHUB_OUTPUT
+          echo "version=$(cat dpiDisabler/Makefile | grep PKG_VERSION | sed 's/PKG_VERSION:=//')" >> $GITHUB_OUTPUT
           if [[ "${{ github.event_name }}" != "pull_request" ]]; then
             echo "sha=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
           else
@@ -59,16 +59,16 @@ jobs:
         shell: bash
         run: |
           make -j$(nproc)
-          strip -s build/youtubeUnblock
-          cp -va build/youtubeUnblock .
-          tar -czvf static-youtubeUnblock-$VERSION-$SHA-$PLATFORM.tar.gz youtubeUnblock youtubeUnblock.service README.md
+          strip -s build/dpiDisabler
+          cp -va build/dpiDisabler .
+          tar -czvf static-dpiDisabler-$VERSION-$SHA-$PLATFORM.tar.gz dpiDisabler dpiDisabler.service README.md
 
       - name: Upload artifacts
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: static-youtubeUnblock-${{ matrix.arch }}
-          path: ./**/static-youtubeUnblock*.tar.gz
+          name: static-dpiDisabler-${{ matrix.arch }}
+          path: ./**/static-dpiDisabler*.tar.gz
 
   build-kmod:
     needs: prepare
@@ -95,13 +95,13 @@ jobs:
           SHA: ${{ needs.prepare.outputs.sha }}
         shell: bash
         run: |
-          docker run --rm -v ./:/youtubeUnblock -w /youtubeUnblock waujito/kernel-bins:${{ matrix.kernel_version }} make kmake KERNEL_BUILDER_MAKEDIR:=/linux
-          tar -czvf kmod-youtubeUnblock-$VERSION-$SHA-linux-${{ matrix.kernel_version }}.tar.gz kyoutubeUnblock.ko
+          docker run --rm -v ./:/dpiDisabler -w /dpiDisabler waujito/kernel-bins:${{ matrix.kernel_version }} make kmake KERNEL_BUILDER_MAKEDIR:=/linux
+          tar -czvf kmod-dpiDisabler-$VERSION-$SHA-linux-${{ matrix.kernel_version }}.tar.gz kdpiDisabler.ko
 
       - name: Upload artifacts
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: kmod-youtubeUnblock-linux-${{ matrix.kernel_version }}
-          path: ./**/kmod-youtubeUnblock*.tar.gz
+          name: kmod-dpiDisabler-linux-${{ matrix.kernel_version }}
+          path: ./**/kmod-dpiDisabler*.tar.gz
 

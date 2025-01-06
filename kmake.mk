@@ -16,10 +16,10 @@ kmod:
 	$(MAKE) -C $(KERNEL_BUILDER_MAKEDIR) M=$(PWD) EXTRA_CFLAGS='-DPKG_VERSION=\"$(PKG_FULLVERSION)\"' modules
 
 kload:
-	insmod kyoutubeUnblock.ko
+	insmod kdpiDisabler.ko
 
 kunload:
-	-rmmod kyoutubeUnblock
+	-rmmod kdpiDisabler
 
 kreload: kunload kload
 

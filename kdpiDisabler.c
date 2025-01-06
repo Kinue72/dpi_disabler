@@ -2,7 +2,7 @@
 #error "You are trying to compile the kernel module not in the kernel space"
 #endif
 
-// Kernel module for youtubeUnblock.
+// Kernel module for dpiDisabler.
 // Build with make kmake 
 #include <linux/module.h>
 #include <linux/init.h>
@@ -31,7 +31,7 @@ MODULE_VERSION(PKG_VERSION);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Vadim Vetrov <vetrovvd@gmail.com>");
-MODULE_DESCRIPTION("Linux kernel module for youtubeUnblock");
+MODULE_DESCRIPTION("Linux kernel module for dpiDisabler");
 
 static struct socket *rawsocket;
 
@@ -223,7 +223,7 @@ erret_lc:
 }
 
 static int delay_packet_send(const unsigned char *data, unsigned int data_len, unsigned int delay_ms) {
-	lginfo("delay_packet_send won't work on current youtubeUnblock version");
+	lginfo("delay_packet_send won't work on current dpiDisabler version");
 	return send_raw_socket(data, data_len);
 }
 
@@ -427,7 +427,7 @@ static int __init ykb_init(void) {
 	}
 
 ipv6_fallback:
-	lginfo("youtubeUnblock kernel module started.\n");
+	lginfo("dpiDisabler kernel module started.\n");
 	return 0;
 
 err:
@@ -457,7 +457,7 @@ static void __exit ykb_destroy(void) {
 	close_raw_socket();
 
 	free_config(config);
-	lginfo("youtubeUnblock kernel module destroyed.\n");
+	lginfo("dpiDisabler kernel module destroyed.\n");
 }
 
 module_init(ykb_init);

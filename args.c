@@ -307,7 +307,7 @@ static struct option long_opt[] = {
 };
 
 void print_version(void) {
-  	printf("youtubeUnblock" 
+  	printf("dpiDisabler" 
 #if defined(PKG_VERSION)
 	" " PKG_VERSION
 #endif

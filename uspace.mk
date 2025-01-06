@@ -29,9 +29,9 @@ endif
 
 export CC CCLD LD CFLAGS LDFLAGS LIBNFNETLINK_CFLAGS LIBNFNETLINK_LIBS LIBMNL_CFLAGS LIBMNL_LIBS
 
-APP:=$(BUILD_DIR)/youtubeUnblock
+APP:=$(BUILD_DIR)/dpiDisabler
 
-SRCS := youtubeUnblock.c mangle.c args.c utils.c quic.c tls.c getopt.c
+SRCS := dpiDisabler.c mangle.c args.c utils.c quic.c tls.c getopt.c
 OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
 LIBNFNETLINK := $(DEPSDIR)/lib/libnfnetlink.la
@@ -88,14 +88,14 @@ install: all
 	install -d $(DESTDIR)$(PREFIX)/bin/
 	install -m 755 $(APP) $(DESTDIR)$(PREFIX)/bin/
 	install -d $(DESTDIR)$(PREFIX)/lib/systemd/system/
-	@cp youtubeUnblock.service $(BUILD_DIR)
-	@sed -i 's/$$(PREFIX)/$(subst /,\/,$(PREFIX))/g' $(BUILD_DIR)/youtubeUnblock.service
-	install -m 644 $(BUILD_DIR)/youtubeUnblock.service $(DESTDIR)$(PREFIX)/lib/systemd/system/
+	@cp dpiDisabler.service $(BUILD_DIR)
+	@sed -i 's/$$(PREFIX)/$(subst /,\/,$(PREFIX))/g' $(BUILD_DIR)/dpiDisabler.service
+	install -m 644 $(BUILD_DIR)/dpiDisabler.service $(DESTDIR)$(PREFIX)/lib/systemd/system/
 
 uninstall:
-	rm $(DESTDIR)$(PREFIX)/bin/youtubeUnblock
-	rm $(DESTDIR)$(PREFIX)/lib/systemd/system/youtubeUnblock.service
-	-systemctl disable youtubeUnblock.service
+	rm $(DESTDIR)$(PREFIX)/bin/dpiDisabler
+	rm $(DESTDIR)$(PREFIX)/lib/systemd/system/dpiDisabler.service
+	-systemctl disable dpiDisabler.service
 
 clean:
 	find $(BUILD_DIR) -maxdepth 1 -type f | xargs rm -rf
