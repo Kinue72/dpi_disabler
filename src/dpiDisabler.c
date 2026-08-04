@@ -1,5 +1,5 @@
 /*
-  youtubeUnblock - https://github.com/Waujito/youtubeUnblock
+  dpiDisabler - https://github.com/Waujito/dpiDisabler
 
   Copyright (C) 2024-2025 Vadim Vetrov <vetrovvd@gmail.com>
 
@@ -850,7 +850,7 @@ int init_queue(int queue_num) {
 		if (ret < 0) {
 			lgerror(ret, "mnl_cb_run");
 			if (ret == -EPERM) {
-				lgerr("Probably another instance of youtubeUnblock with the same queue number is running");
+				lgerr("Probably another instance of dpiDisabler with the same queue number is running");
 			} else {
 				lgerr("Make sure the nfnetlink_queue kernel module is loaded");
 			}
@@ -900,7 +900,7 @@ struct instance_config_t instance_config = {
 };
 
 void sigint_handler(int s) {
-	lginfo("youtubeUnblock stats: catched %ld packets, "
+	lginfo("dpiDisabler stats: catched %ld packets, "
 		"processed %ld packets, "
 		"targetted %ld packets, sent over socket %ld packets",
 		global_stats.all_packet_counter, global_stats.packet_counter, 

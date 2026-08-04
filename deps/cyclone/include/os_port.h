@@ -27,7 +27,7 @@
  **/
 
 /**
-* Rewrote for youtubeUnblock
+* Rewrote for dpiDisabler
 */
 
 #ifndef _OS_PORT_H

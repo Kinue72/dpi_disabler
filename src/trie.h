@@ -1,5 +1,5 @@
 /*
-  youtubeUnblock - https://github.com/Waujito/youtubeUnblock
+  dpiDisabler - https://github.com/Waujito/dpiDisabler
 
   Copyright (C) 2024-2025 Vadim Vetrov <vetrovvd@gmail.com>
 
@@ -31,7 +31,7 @@
  * for a list of patterns in the linear time.
  *
  * The algorithm will lazily initialize itself while 
- * youtubeUnblock works. Lazy initializations considered 
+ * dpiDisabler works. Lazy initializations considered 
  * safe for multithreading and operate without atomicity 
  * or synchronization primitives.
  *

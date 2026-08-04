@@ -1,5 +1,5 @@
 /*
-  youtubeUnblock - https://github.com/Waujito/youtubeUnblock
+  dpiDisabler - https://github.com/Waujito/dpiDisabler
 
   Copyright (C) 2024-2025 Vadim Vetrov <vetrovvd@gmail.com>
 
@@ -21,7 +21,7 @@
 #error "You are trying to compile the kernel module not in the kernel space"
 #endif
 
-// Kernel module for youtubeUnblock.
+// Kernel module for dpiDisabler.
 // Build with make kmake 
 #include <linux/module.h>
 #include <linux/init.h>
@@ -59,7 +59,7 @@ MODULE_VERSION(PKG_VERSION);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Vadim Vetrov <vetrovvd@gmail.com>");
-MODULE_DESCRIPTION("Linux kernel module for youtubeUnblock");
+MODULE_DESCRIPTION("Linux kernel module for dpiDisabler");
 
 static struct socket *rawsocket;
 static struct socket *raw6socket;
@@ -85,13 +85,13 @@ static int params_set(const char *cval, const struct kernel_param *kp) {
 		cv_len--;
 	}
 
-	const char *ytb_prefix = "youtubeUnblock ";
-	int ytbp_len = strlen(ytb_prefix);
-	int len = cv_len + ytbp_len; 
+	const char *dpi_prefix = "dpiDisabler ";
+	int dpip_len = strlen(dpi_prefix);
+	int len = cv_len + dpip_len; 
 
 	char *val = kmalloc(len + 1, GFP_KERNEL); // 1 for null-terminator
-	strncpy(val, ytb_prefix, ytbp_len);
-	strncpy(val + ytbp_len, cval, cv_len);
+	strncpy(val, dpi_prefix, dpip_len);
+	strncpy(val + dpip_len, cval, cv_len);
 	val[len] = '\0';
 
 	int argc = 0;
@@ -348,7 +348,7 @@ erret_lc:
 }
 
 static int delay_packet_send(const unsigned char *data, size_t data_len, unsigned int delay_ms) {
-	lginfo("delay_packet_send won't work on current youtubeUnblock version");
+	lginfo("delay_packet_send won't work on current dpiDisabler version");
 	return send_raw_socket(data, data_len);
 }
 
@@ -590,7 +590,7 @@ static struct pernet_operations ykb_pernet_ops = {
 #ifdef CONFIG_PROC_FS
 
 static int proc_stats_show(struct seq_file *s, void *v) {
-	seq_printf(s, "youtubeUnblock stats: \n"
+	seq_printf(s, "dpiDisabler stats: \n"
 		"\tCatched: %ld packets\n"
 		"\tProcessed: %ld packets\n"
 		"\tTargetted: %ld packets\n"
@@ -656,12 +656,12 @@ static int __init ykb_init(void) {
 #ifdef CONFIG_PROC_FS
 	if (!
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0)
-		proc_create_single("kyoutubeUnblock", 0, NULL, proc_stats_show)
+		proc_create_single("kdpiDisabler", 0, NULL, proc_stats_show)
 #else
-		proc_create("kyoutubeUnblock", 0, NULL, &proc_stats_operations)
+		proc_create("kdpiDisabler", 0, NULL, &proc_stats_operations)
 #endif
 	) {
-		lgwarning("kyoutubeUnblock procfs entry creation failed");
+		lgwarning("kdpiDisabler procfs entry creation failed");
 	}
 #endif
 
@@ -675,7 +675,7 @@ static int __init ykb_init(void) {
 		goto err_close_sock;
 
 
-	lginfo("youtubeUnblock kernel module started.\n");
+	lginfo("dpiDisabler kernel module started.\n");
 	return 0;
 
 err_close_sock:
@@ -702,12 +702,12 @@ static void __exit ykb_destroy(void) {
 #endif
 
 #ifdef CONFIG_PROC_FS
-	remove_proc_entry("kyoutubeUnblock", NULL);
+	remove_proc_entry("kdpiDisabler", NULL);
 #endif
 
 	close_raw_socket();
 	kref_put(&cur_config->refcount, config_release);
-	lginfo("youtubeUnblock kernel module destroyed.\n");
+	lginfo("dpiDisabler kernel module destroyed.\n");
 }
 
 module_init(ykb_init);

@@ -1,5 +1,5 @@
 /*
-  youtubeUnblock - https://github.com/Waujito/youtubeUnblock
+  dpiDisabler - https://github.com/Waujito/dpiDisabler
 
   Copyright (C) 2024-2025 Vadim Vetrov <vetrovvd@gmail.com>
 

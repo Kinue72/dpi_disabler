@@ -1,5 +1,5 @@
 /*
-  youtubeUnblock - https://github.com/Waujito/youtubeUnblock
+  dpiDisabler - https://github.com/Waujito/dpiDisabler
 
   Copyright (C) 2024-2025 Vadim Vetrov <vetrovvd@gmail.com>
 
@@ -463,7 +463,7 @@ static struct option long_opt[] = {
 };
 
 void print_version(void) {
-  	printf("youtubeUnblock" 
+  	printf("dpiDisabler" 
 #if defined(PKG_VERSION)
 	" " PKG_VERSION
 #endif
